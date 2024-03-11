@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  watermarkgenerator:
+    image: watermarkgenerator:latest
+    ports:
+      - "5069:80"
