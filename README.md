@@ -1,2 +1,1 @@
 # WatermarkGenerator
-# WatermarkGenerator
