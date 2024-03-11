@@ -5,6 +5,7 @@ using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
 using WebApiClient.interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 
@@ -12,9 +13,16 @@ namespace WebApiClient.controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ImageController : ControllerBase // Rename controller to ImageController
+    public class ImageController : ControllerBase
     {
-        [HttpPost("process")] // Change route to /image/process
+        private readonly ILogger<ImageController> _logger;
+
+        public ImageController(ILogger<ImageController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpPost("process")]
         public IActionResult AddWatermark([FromBody] WatermarkApiSchema.WatermarkRequest request)
         {
             try
@@ -33,9 +41,9 @@ namespace WebApiClient.controllers
                 var text = request.Watermark.Text;
 
                 var textSize = TextMeasurer.MeasureSize(text, new TextOptions(font));
-                var textLocation = new PointF(image.Width - textSize.Width - 10, image.Height - textSize.Height - 10); // Adjust padding as needed
+                var textLocation = new PointF(image.Width - textSize.Width - 10, image.Height - textSize.Height - 10);
 
-                var backgroundRectangle = new RectangularPolygon(textLocation.X - 5, textLocation.Y - 5, textSize.Width + 10, textSize.Height + 10); // Adjust padding as needed
+                var backgroundRectangle = new RectangularPolygon(textLocation.X - 5, textLocation.Y - 5, textSize.Width + 10, textSize.Height + 10);
                 image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
                 // Apply the watermark
@@ -51,11 +59,32 @@ namespace WebApiClient.controllers
                 // Convert the watermarked image to Base64 string
                 var outputBase64 = ConvertToBase64(image);
 
-                // Return the Base64 string of the watermarked image
+                var logDetails = new WatermarkApiSchema.LogDetails
+                {
+                    Timestamp = $"{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz}",
+                    RequestMethod = "POST",
+                    RequestBody = request,
+                    RequestUrl = "/image/process",
+                    StatusCode = 200,
+                    Response = outputBase64
+                };
+
+                _logger.LogInformation("Image processed successfully. {@logDetails}", logDetails);
+
                 return Ok(new { ProcessedImage = $"data:image/webp;base64,{outputBase64}" });
             }
             catch (Exception ex)
             {
+                var logDetails = new WatermarkApiSchema.LogDetails
+                {
+                    Timestamp = $"{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz}",
+                    RequestMethod = "POST",
+                    RequestBody = request,
+                    RequestUrl = "/image/process",
+                    StatusCode = 500,
+                    Response = ex.Message
+                };
+                _logger.LogError("An error occurred while processing the image. {@logDetails}", logDetails);
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }

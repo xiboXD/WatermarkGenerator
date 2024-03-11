@@ -22,4 +22,14 @@ public abstract class WatermarkApiSchema
         [JsonPropertyName("text")]
         public string Text { get; set; }
     }
+
+    public class LogDetails
+    {
+        [JsonPropertyName("timestamp")] public string Timestamp { get; set; }
+        [JsonPropertyName("request_method")] public string RequestMethod { get; set; }
+        [JsonPropertyName("request_body")] public WatermarkRequest RequestBody { get; set; }
+        [JsonPropertyName("request_url")] public string RequestUrl { get; set; }
+        [JsonPropertyName("status_code")] public int StatusCode { get; set; }
+        [JsonPropertyName("response")] public string Response { get; set; }
+    }
 }
