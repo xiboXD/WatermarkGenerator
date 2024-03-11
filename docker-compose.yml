@@ -1,7 +1,9 @@
-version: '3.8'
+version: "3.8"
 
 services:
   watermarkgenerator:
     image: watermarkgenerator:latest
     ports:
       - "5069:80"
+    volumes:
+      - ./font/PressStart2P-Regular.ttf:/app/font/PressStart2P-Regular.ttf:ro
