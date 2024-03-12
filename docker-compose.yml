@@ -7,3 +7,4 @@ services:
       - "5069:80"
     volumes:
       - ./font/PressStart2P-Regular.ttf:/app/font/PressStart2P-Regular.ttf:ro
+      - ./logs/log-20230312.txt:/var/logs/log.txt:ro
