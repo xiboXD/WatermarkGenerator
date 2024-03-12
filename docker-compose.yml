@@ -5,5 +5,3 @@ services:
     image: watermarkgenerator:latest
     ports:
       - "5069:80"
-    volumes:
-      - ./font/PressStart2P-Regular.ttf:/app/font/PressStart2P-Regular.ttf:ro
