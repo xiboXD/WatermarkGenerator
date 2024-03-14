@@ -33,14 +33,14 @@ public class ImageController : ControllerBase
             // Define the font and text options for your watermark
             var fonts = new FontCollection();
             var fontFamily = fonts.Add("font/PressStart2P-Regular.ttf");
-            var font = fontFamily.CreateFont(10, FontStyle.Regular);
+            var font = fontFamily.CreateFont(7, FontStyle.Regular);
 
             var text = request.Watermark.Text;
 
             var textSize = TextMeasurer.MeasureSize(text, new TextOptions(font));
-            var textLocation = new PointF(image.Width - textSize.Width - 10, image.Height - textSize.Height - 10);
+            var textLocation = new PointF(image.Width - textSize.Width - 4, image.Height - textSize.Height - 4);
 
-            var backgroundRectangle = new RectangularPolygon(textLocation.X - 5, textLocation.Y - 5, textSize.Width + 10, textSize.Height + 10);
+            var backgroundRectangle = new RectangularPolygon(textLocation.X - 2, textLocation.Y - 2, textSize.Width + 4, textSize.Height + 4);
             image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
             // Apply the watermark
