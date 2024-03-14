@@ -38,9 +38,9 @@ public class ImageController : ControllerBase
             var text = request.Watermark.Text;
 
             var textSize = TextMeasurer.MeasureSize(text, new TextOptions(font));
-            var textLocation = new PointF(image.Width - textSize.Width - 4, image.Height - textSize.Height - 4);
+            var textLocation = new PointF(image.Width - textSize.Width - 2, image.Height - textSize.Height - 2);
 
-            var backgroundRectangle = new RectangularPolygon(textLocation.X - 2, textLocation.Y - 2, textSize.Width + 4, textSize.Height + 4);
+            var backgroundRectangle = new RectangularPolygon(textLocation.X - 2, textLocation.Y - 2, textSize.Width + 2, textSize.Height + 2);
             image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
             // Apply the watermark
