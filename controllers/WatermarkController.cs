@@ -15,10 +15,8 @@ public class ImageController : ControllerBase
     private static readonly Config Config = new Config
     {
         FontSize = 12,
-        OffsetX = 2,
-        OffsetY = 4,
-        PaddingX = 2,
-        PaddingY = 2,
+        PaddingX = 1,
+        PaddingY = 1,
         FilePath = "font/SpaceMono-Regular.ttf"
     };
     private readonly ILogger<ImageController> _logger;
@@ -46,10 +44,10 @@ public class ImageController : ControllerBase
 
             var text = request.Watermark.Text;
 
-            var textSize = TextMeasurer.MeasureSize(text, new TextOptions(font));
-            var textLocation = new PointF(image.Width - textSize.Width - Config.OffsetX, image.Height - textSize.Height - Config.OffsetY);
+            var textSize = TextMeasurer.MeasureAdvance(text, new TextOptions(font));
+            var textLocation = new PointF(image.Width - textSize.Width - Config.PaddingX, image.Height - textSize.Height - Config.PaddingY);
 
-            var backgroundRectangle = new RectangularPolygon(textLocation.X - Config.PaddingX, textLocation.Y - Config.PaddingY, textSize.Width + Config.PaddingX, textSize.Height + Config.PaddingY);
+            var backgroundRectangle = new RectangularPolygon(textLocation.X - Config.PaddingX, textLocation.Y - Config.PaddingY, textSize.Width + 2 * Config.PaddingX, textSize.Height + 2 * Config.PaddingY);
             image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
             // Apply the watermark
