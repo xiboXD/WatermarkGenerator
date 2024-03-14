@@ -12,6 +12,15 @@ namespace WebApiClient.controllers;
 [ApiController]
 public class ImageController : ControllerBase
 {
+    private static readonly Config Config = new Config
+    {
+        FontSize = 12,
+        OffsetX = 2,
+        OffsetY = 4,
+        PaddingX = 2,
+        PaddingY = 2,
+        FilePath = "font/SpaceMono-Regular.ttf"
+    };
     private readonly ILogger<ImageController> _logger;
 
     public ImageController(ILogger<ImageController> logger)
@@ -32,15 +41,15 @@ public class ImageController : ControllerBase
 
             // Define the font and text options for your watermark
             var fonts = new FontCollection();
-            var fontFamily = fonts.Add("font/PressStart2P-Regular.ttf");
-            var font = fontFamily.CreateFont(7, FontStyle.Regular);
+            var fontFamily = fonts.Add(Config.FilePath);
+            var font = fontFamily.CreateFont(Config.FontSize, FontStyle.Regular);
 
             var text = request.Watermark.Text;
 
             var textSize = TextMeasurer.MeasureSize(text, new TextOptions(font));
-            var textLocation = new PointF(image.Width - textSize.Width - 2, image.Height - textSize.Height - 2);
+            var textLocation = new PointF(image.Width - textSize.Width - Config.OffsetX, image.Height - textSize.Height - Config.OffsetY);
 
-            var backgroundRectangle = new RectangularPolygon(textLocation.X - 2, textLocation.Y - 2, textSize.Width + 2, textSize.Height + 2);
+            var backgroundRectangle = new RectangularPolygon(textLocation.X - Config.PaddingX, textLocation.Y - Config.PaddingY, textSize.Width + Config.PaddingX, textSize.Height + Config.PaddingY);
             image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
             // Apply the watermark
