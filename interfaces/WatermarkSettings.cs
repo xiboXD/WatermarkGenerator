@@ -1,6 +1,6 @@
 namespace WebApiClient.interfaces;
 
-public class Config
+public class WatermarkSettings
 {
     public int FontSize { get; set; }
     public int PaddingX { get; set; }

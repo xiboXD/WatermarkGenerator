@@ -12,18 +12,16 @@ namespace WebApiClient.controllers;
 [ApiController]
 public class ImageController : ControllerBase
 {
-    private static readonly Config Config = new Config
-    {
-        FontSize = 12,
-        PaddingX = 1,
-        PaddingY = 1,
-        FilePath = "font/SpaceMono-Regular.ttf"
-    };
+    private WatermarkSettings _watermarkSettings;
+    private ResizeSettings _resizeSettings;
     private readonly ILogger<ImageController> _logger;
 
-    public ImageController(ILogger<ImageController> logger)
+    public ImageController(ILogger<ImageController> logger, WatermarkSettings watermarkSettings,
+        ResizeSettings resizeSettings)
     {
         _logger = logger;
+        _watermarkSettings = watermarkSettings;
+        _resizeSettings = resizeSettings;
     }
 
     [HttpPost("process")]
@@ -39,15 +37,18 @@ public class ImageController : ControllerBase
 
             // Define the font and text options for your watermark
             var fonts = new FontCollection();
-            var fontFamily = fonts.Add(Config.FilePath);
-            var font = fontFamily.CreateFont(Config.FontSize, FontStyle.Regular);
+            var fontFamily = fonts.Add(_watermarkSettings.FilePath);
+            var font = fontFamily.CreateFont(_watermarkSettings.FontSize, FontStyle.Regular);
 
             var text = request.Watermark.Text;
 
             var textSize = TextMeasurer.MeasureAdvance(text, new TextOptions(font));
-            var textLocation = new PointF(image.Width - textSize.Width - Config.PaddingX, image.Height - textSize.Height - Config.PaddingY);
+            var textLocation = new PointF(image.Width - textSize.Width - _watermarkSettings.PaddingX,
+                image.Height - textSize.Height - _watermarkSettings.PaddingY);
 
-            var backgroundRectangle = new RectangularPolygon(textLocation.X - Config.PaddingX, textLocation.Y - Config.PaddingY, textSize.Width + 2 * Config.PaddingX, textSize.Height + 2 * Config.PaddingY);
+            var backgroundRectangle = new RectangularPolygon(textLocation.X - _watermarkSettings.PaddingX,
+                textLocation.Y - _watermarkSettings.PaddingY, textSize.Width + 2 * _watermarkSettings.PaddingX,
+                textSize.Height + 2 * _watermarkSettings.PaddingY);
             image.Mutate(x => x.Fill(Color.White.WithAlpha(0.6f), backgroundRectangle));
 
             // Apply the watermark
@@ -62,6 +63,9 @@ public class ImageController : ControllerBase
 
             // Convert the watermarked image to Base64 string
             var outputBase64 = ConvertToBase64(image);
+            
+            image.Mutate(x => x.Resize(_resizeSettings.Width, _resizeSettings.Height));
+            var resizedBase64 = ConvertToBase64(image);
 
             var logDetails = new WatermarkApiSchema.LogDetails
             {
@@ -75,7 +79,11 @@ public class ImageController : ControllerBase
 
             _logger.LogInformation("Image processed successfully. {@LogDetails}", logDetails);
 
-            return Ok(new { ProcessedImage = $"data:image/webp;base64,{outputBase64}" });
+            return Ok(new
+            {
+                ProcessedImage = $"data:image/webp;base64,{outputBase64}",
+                Resized = $"data:image/webp;base64,{resizedBase64}",
+            });
         }
         catch (Exception ex)
         {
