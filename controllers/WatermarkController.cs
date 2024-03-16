@@ -93,20 +93,20 @@ public class ImageController : ControllerBase
         var font = fontFamily.CreateFont(config.FontSize, FontStyle.Regular);
 
         var textSize = TextMeasurer.MeasureAdvance(text, new TextOptions(font));
-        var textLocation = new PointF((image.Width - textSize.Width) / 2,
-            image.Height - (textSize.Height + config.PaddingY + config.OffsetY));
+        var textLocation = new PointF(image.Width - textSize.Width - config.PaddingX,
+            image.Height - textSize.Height - config.PaddingY);
 
-        var backgroundRectangle = new RectangularPolygon(textLocation.X - config.PaddingX,
-            textLocation.Y - config.PaddingY, textSize.Width + 2 * config.PaddingX,
+        var backgroundRectangle = new RectangularPolygon(image.Width - textSize.Width - 2 * config.PaddingX,
+            image.Height - textSize.Height - 2 * config.PaddingY, textSize.Width + 2 * config.PaddingX,
             textSize.Height + 2 * config.PaddingY);
 
-        image.Mutate(x => x.Fill(Color.Black.WithAlpha(0.55f), backgroundRectangle));
+        image.Mutate(x => x.Fill(Color.White.WithAlpha(0.32f), backgroundRectangle));
         // Apply the watermark
         image.Mutate(x =>
             x.DrawText(
                 text,
                 font,
-                Color.White.WithAlpha(0.8f),
+                Color.Black.WithAlpha(0.6f),
                 textLocation
             )
         );
